@@ -26,3 +26,11 @@ def test_metrics_and_history():
 def test_404():
     assert c.get("/sites/nope/forecast", params={"model": "lgbm_v1"}).status_code == 404
     assert c.get("/sites/flensburg/forecast", params={"model": "nope"}).status_code == 404
+
+
+def test_stub_data_valid():
+    import subprocess
+    import sys
+
+    r = subprocess.run([sys.executable, "scripts/validate_data.py"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout

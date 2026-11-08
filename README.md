@@ -21,3 +21,5 @@ New model = new folder under `models/`. No code change.
 ## Docker
     docker compose up --build      # API on http://localhost:8000/docs
 Mounts `./data`; if it has no `sites.csv`, stub data is generated on start.
+
+See `docs/data-contract.md`. Validate an export: `python scripts/validate_data.py [data_dir]`.
