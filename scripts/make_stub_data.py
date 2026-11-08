@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).resolve().parent.parent / "data"
+import os
+OUT = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parent.parent / "data"))
 rng = np.random.default_rng(0)
 
 SITES = [  # site_id, name, country, level, role, mean kWh

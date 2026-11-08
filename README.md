@@ -17,3 +17,7 @@ New model = new folder under `models/`. No code change.
 
 ## Endpoints
 `/sites`, `/models`, `/sites/{id}/history`, `/sites/{id}/issues?model=`, `/sites/{id}/forecast?model=&issue=`, `/sites/{id}/metrics?model=`
+
+## Docker
+    docker compose up --build      # API on http://localhost:8000/docs
+Mounts `./data`; if it has no `sites.csv`, stub data is generated on start.
