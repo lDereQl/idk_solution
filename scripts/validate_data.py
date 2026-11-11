@@ -1,4 +1,4 @@
-"""Validate a data dir against the data layout in README.md. Exit 1 on errors."""
+"""Validate a data dir against docs/data-contract.md. Exit 1 on errors."""
 import json
 import sys
 from pathlib import Path
