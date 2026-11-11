@@ -2,6 +2,11 @@ services:
   api:
     build: .
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
     volumes:
       - ./data:/srv/data   # drop real exports here; empty/missing -> stub data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 2s
+      timeout: 2s
+      retries: 30

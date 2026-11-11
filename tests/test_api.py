@@ -34,3 +34,22 @@ def test_stub_data_valid():
 
     r = subprocess.run([sys.executable, "scripts/validate_data.py"], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout
+
+
+def test_point_baseline_forecast_has_null_band():
+    r = c.get("/sites/kaunas_synthetic/forecast", params={"model": "baseline_24h"})
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 72 and rows[0]["p10"] is None and rows[0]["p50"] > 0
+
+
+def test_history_gap_is_null(monkeypatch):
+    import numpy as np
+
+    from app import repository as repo
+
+    h = repo.history("flensburg").copy()
+    h.loc[h.index[-1], "heat_kwh"] = np.nan
+    monkeypatch.setattr(repo, "history", lambda site_id: h)
+    r = c.get("/sites/flensburg/history")
+    assert r.status_code == 200 and r.json()[-1]["heat_kwh"] is None

@@ -5,3 +5,4 @@ pyarrow
 numpy
 httpx
 pytest
+pillow
