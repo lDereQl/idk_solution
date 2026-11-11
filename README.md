@@ -39,4 +39,4 @@ NaN is sent as `null` (`p10`, `p90`, `p_peak` of point baselines, gaps in histor
     make up      # or: docker compose up --build. API on http://localhost:8000/docs, presentation at /demo
 Mounts `./data`; if it has no `sites.csv`, stub data is generated on start.
 
-See `docs/data-contract.md`. Validate an export: `python scripts/validate_data.py [data_dir]`.
+Validate an export: `python scripts/validate_data.py [data_dir]`.
