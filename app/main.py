@@ -1,10 +1,19 @@
+import os
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from . import repository as repo
 
+DEMO_HTML = Path(__file__).resolve().parent.parent / "web" / "out" / "kaunas-heat-forecast-demo.html"
+
 app = FastAPI(title="Heat demand forecast API")
+if os.environ.get("DEV_CORS") == "1":
+    app.add_middleware(CORSMiddleware, allow_origins=["null"], allow_methods=["GET"])
 
 
 def _site_or_404(site_id: str) -> None:
@@ -25,9 +34,20 @@ def _ts(s: str, name: str) -> pd.Timestamp:
     return t.tz_localize("UTC") if t.tzinfo is None else t.tz_convert("UTC")
 
 
+def _records(df: pd.DataFrame) -> list[dict]:
+    return df.astype(object).where(df.notna(), None).to_dict("records")
+
+
 @app.get("/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/demo", include_in_schema=False)
+def demo():
+    if not DEMO_HTML.exists():
+        raise HTTPException(404, "demo page not built: run python web/build.py")
+    return FileResponse(DEMO_HTML)
 
 
 @app.get("/sites")
@@ -48,7 +68,7 @@ def get_history(site_id: str, start: str | None = None, end: str | None = None):
         df = df[df.timestamp_utc >= _ts(start, "start")]
     if end:
         df = df[df.timestamp_utc < _ts(end, "end")]
-    return df.assign(timestamp_utc=df.timestamp_utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ")).to_dict("records")
+    return _records(df.assign(timestamp_utc=df.timestamp_utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ")))
 
 
 @app.get("/sites/{site_id}/issues")
@@ -78,7 +98,7 @@ def get_forecast(site_id: str, model: str, issue: str | None = None):
         issue_time_utc=f.issue_time_utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
         target_time_utc=f.target_time_utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
-    return f.drop(columns="site_id").to_dict("records")
+    return _records(f.drop(columns="site_id"))
 
 
 @app.get("/sites/{site_id}/metrics")
@@ -89,7 +109,7 @@ def get_metrics(site_id: str, model: str):
     f = repo.forecasts(model)
     f = f[f.site_id == site_id].merge(
         repo.history(site_id), left_on="target_time_utc", right_on="timestamp_utc"
-    )
+    ).dropna(subset=["p50", "heat_kwh"])
     if f.empty:
         raise HTTPException(404, "no overlap between forecast and history")
     err = (f.p50 - f.heat_kwh).abs()
