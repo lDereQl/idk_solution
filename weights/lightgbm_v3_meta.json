@@ -45,5 +45,5 @@
   "bronderslev_dma_c": 4494.49267578125,
   "sonderborg_total": 42538.97265625
  },
- "usage": "divide heat_lag_*/heat_roll24_* by the site's mean demand (scale), predict, multiply by scale; widen P10/P90 by interval_margin * scale"
+ "usage": "divide heat_lag_*/heat_roll24_* by the site's scale (mean heat_kwh of its horizon-1 rows), predict, multiply by scale; widen P10/P90 by interval_margin * scale"
 }

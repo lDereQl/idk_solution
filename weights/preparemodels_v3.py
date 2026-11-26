@@ -13,7 +13,9 @@ What changed from v2, and why (found when testing v2 on data it never saw):
 Input: the feature tables from clever-energy-data (python pipeline.py all) copied to data/features/.
 Output: models/lightgbm_{p10,p50,p90}_v3.pkl and models/lightgbm_v3_meta.json (inputs, scales, interval margin).
 Prediction in kWh = model.predict(X with past demand divided by scale) * scale, where scale is the site's mean
-demand in an earlier period; P10/P90 are widened by the margin (also in units of scale).
+demand in an earlier period; P10/P90 are widened by the margin (also in units of scale). The scale is the mean
+heat_kwh of the horizon-1 rows, i.e. of the forecast issue hours (06:00 UTC in the default feature table), so a new
+site must be scaled the same way (scripts/export_demo_data.py does it through add_scaled).
 
 Needs: pandas, numpy, pyarrow, lightgbm, joblib.
 """
@@ -43,7 +45,8 @@ PARAMS = dict(n_estimators=500, learning_rate=0.05, num_leaves=63, min_child_sam
 
 
 def add_scaled(df, ref_years):
-    """Divide target and past demand by each site's mean demand in ref_years (known before the test year)."""
+    """Divide target and past demand by each site's scale: the mean heat_kwh of its horizon-1 rows (the issue
+    hour, 06:00 UTC by default) in ref_years, which must lie before the forecasts."""
     parts, scales = [], {}
     for site, g in df.groupby("site_id"):
         ref = g[g["issue_time_utc"].dt.year.isin(ref_years) & (g["horizon_h"] == 1)]["heat_kwh"].mean()
@@ -113,7 +116,7 @@ def main():
         joblib.dump(m, MODELS / f"lightgbm_{q}_v3.pkl")
     meta = {"inputs": INPUTS, "scaled_inputs": HEAT, "interval_margin": margin, "train_years": TRAIN_YEARS,
             "training_site_scales_kwh": scales,
-            "usage": "divide heat_lag_*/heat_roll24_* by the site's mean demand (scale), predict, multiply by scale; "
+            "usage": "divide heat_lag_*/heat_roll24_* by the site's scale (mean heat_kwh of its horizon-1 rows), predict, multiply by scale; "
                      "widen P10/P90 by interval_margin * scale"}
     (MODELS / "lightgbm_v3_meta.json").write_text(json.dumps(meta, indent=1))
     print(f"\nModel weights exported to /{MODELS}/ directory!")
