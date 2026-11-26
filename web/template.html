@@ -169,7 +169,7 @@ button:focus-visible{outline:2px solid var(--cool);outline-offset:3px}
 
   <header id="brand" class="layer on">
     <span class="name">Kaunas district heating</span><span class="sub">72-hour demand forecast</span>
-    <span class="badge">Synthetic demo data</span>
+    <span class="badge">Simulated Kaunas demand</span>
     <span class="badge" id="src" hidden></span>
     <span id="tz">Times in Kaunas local time (Europe/Vilnius)</span>
   </header>
@@ -654,7 +654,7 @@ async function loadMetrics() {
 async function boot() {
   try {
     S.models = await load('models');
-    S.model = (S.models.find(m => m.id === 'lgbm_v2') || S.models[S.models.length - 1]).id;
+    S.model = (S.models.find(m => m.id === 'lgbm_v3_kaunas') || S.models[S.models.length - 1]).id;
     S.issues = (await load('issues', S.model)).slice(-7);
     S.issue = S.issues[S.issues.length - 1];
     await loadForecast();

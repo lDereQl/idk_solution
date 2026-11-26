@@ -1,0 +1,49 @@
+{
+ "inputs": [
+  "horizon_h",
+  "temp_c",
+  "apparent_temp_c",
+  "wind_ms",
+  "shortwave_wm2",
+  "cloud_pct",
+  "rh_pct",
+  "snow_depth_m",
+  "hdh",
+  "temp_ema_24h",
+  "temp_ema_48h",
+  "temp_ema_72h",
+  "cold_snap",
+  "hour_sin",
+  "hour_cos",
+  "dow_sin",
+  "dow_cos",
+  "is_holiday",
+  "month",
+  "heating_season",
+  "heat_lag_1h_s",
+  "heat_lag_24h_s",
+  "heat_lag_168h_s",
+  "heat_roll24_mean_s",
+  "heat_roll24_max_s"
+ ],
+ "scaled_inputs": [
+  "heat_lag_1h",
+  "heat_lag_24h",
+  "heat_lag_168h",
+  "heat_roll24_mean",
+  "heat_roll24_max"
+ ],
+ "interval_margin": 0.024288312165813467,
+ "train_years": [
+  2016,
+  2017,
+  2018
+ ],
+ "training_site_scales_kwh": {
+  "bronderslev_dma_a": 2468.8330078125,
+  "bronderslev_dma_b": 5192.3232421875,
+  "bronderslev_dma_c": 4494.49267578125,
+  "sonderborg_total": 42538.97265625
+ },
+ "usage": "divide heat_lag_*/heat_roll24_* by the site's scale (mean heat_kwh of its horizon-1 rows), predict, multiply by scale; widen P10/P90 by interval_margin * scale"
+}

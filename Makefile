@@ -2,6 +2,9 @@ COMPOSE := docker compose
 PY := .venv/bin/python
 PORT ?= 8000
 export PORT
+# folder the Docker API reads: the committed demo data (Kaunas, v3 forecasts); DATA_SRC=./data make run for real exports
+DATA_SRC ?= ./demo_data
+export DATA_SRC
 
 .DEFAULT_GOAL := help
 
