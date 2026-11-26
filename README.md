@@ -30,6 +30,19 @@ Served over http the page calls the API on its own origin. Opened from disk it c
 
 New model = new folder under `models/`. No code change.
 
+## Model training (`weights/`)
+Copy the feature tables from clever-energy-data (`bronderslev`, `sonderborg`, `flensburg` .parquet) to `data/features/`, then from the repo root (needs lightgbm and joblib):
+
+    python weights/preparemodels_v3.py
+
+Writes `models/lightgbm_{p10,p50,p90}_v3.pkl` and `models/lightgbm_v3_meta.json` and prints the 2019 test results. The trained files are committed in `weights/` under the same names. v3 replaces v2 (`preparemodels.py`, `weights/lightgbm_*_tuned.pkl`): v2 scaled the target by site but read past demand in raw kWh, so on the unseen city it lost to "same hour yesterday" (18.1 % vs 11.9 % mean absolute error). v3 scales the target and past demand per site, drops inputs derived from the target, and calibrates P10–P90 on a separate year:
+
+| 2019, mean absolute error | Flensburg (unseen city) | Sønderborg | Brønderslev A |
+|---|---|---|---|
+| Same hour yesterday | 11.9 % | 10.7 % | 12.2 % |
+| v3 | 8.2 % | 5.0 % | 7.6 % |
+| v3 P10–P90 coverage (target 80 %) | 64.9 % | 87.7 % | 72.8 % |
+
 ## Endpoints
 `/sites`, `/models`, `/sites/{id}/history`, `/sites/{id}/issues?model=`, `/sites/{id}/forecast?model=&issue=`, `/sites/{id}/metrics?model=`, `/demo`
 
